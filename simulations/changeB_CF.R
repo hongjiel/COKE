@@ -33,7 +33,7 @@ results_df = data.frame(matrix(ncol = length(header), nrow = 0))
 colnames(results_df) = header
 
 for (B in c(1,5,10,15,20,25)) { # vary S_B
-  nt = round((70*B^0.5 + 12*R + 5) * 5) # number of samples in source data T
+  nt = round((70*B^0.5 + 12*R + 5) * 0.1) # number of samples in source data T
   ns = nt*4 # number of samples in target data S
   
   p = 1/(1 + B^(1/beta)) # p controls degree of covariate shift between S & T

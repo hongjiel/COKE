@@ -28,10 +28,10 @@ Kxx = function(x) matern.kernel_kappa2(u = as.matrix(dist(x)), rho = rho) # K(x,
 Kxy = function(x, y) matern.kernel_kappa2(u = proxy::dist(x, y), rho = rho) # K(x,y)
 
 # read the functions
-source("../separate_regression.R")
-source("../coke.R")
-source("../dr_cate.R")
-source("../acw_cate.R")
+source("./methods/separate_regression.R")
+source("./methods/coke.R")
+source("./methods/dr_cate.R")
+source("./methods/acw_cate.R")
 
 mse_coke = mse_dr = mse_acw = mse_sr = rep(NA, sim)
 header = c("B", "R", "c", "method", "risk")
