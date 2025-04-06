@@ -4,16 +4,15 @@ dr_cate = function(S, T, X_new) {
   ns = nrow(S) # number of samples in S
   lambdas = 2^(0:ceiling(log2(10*(ns/2))))/10/(ns/2) # candidate lambda values
   
-  # split S into 3 parts for the cross-fitting methods
+  # split S into 2 parts for the cross-fitting methods
   indices = sample(1:ns)
-  n1 = ceiling(ns / 3)
+  n1 = ceiling(ns / 2)
   D1 = S[indices[1:n1], ]
-  D2 = S[indices[(n1 + 1):(2 * n1)], ]
-  D3 = S[indices[(2 * n1 + 1):ns], ]
-  S_split = list(D1, D2, D3)
+  D2 = S[indices[(n1 + 1):ns], ]
+  S_split = list(D1, D2)
   
-  # define the three cyclic permutations
-  perms = list(c(1, 2, 3), c(3, 1, 2), c(2, 3, 1))
+  # define the cyclic permutations
+  perms = list(c(1, 2), c(2, 1))
   est_list = list()
   variables = paste0("x", 1:d, collapse = " + ")
   
@@ -67,8 +66,10 @@ dr_cate = function(S, T, X_new) {
     # target parameter estimation using:
       ##S_tg1 (training data)
       ##S_tg2 (test data)
-    S_tg1 = S_split[[perm[2]]]
-    S_tg2 = S_split[[perm[3]]]
+    S_tg = S_split[[perm[2]]]
+    partS_tg = sample(1:nrow(S_tg), ceiling(nrow(S_tg)/2))
+    S_tg1 = S_tg[partS_tg,]
+    S_tg2 = S_tg[-partS_tg,]
     X_tg1 = as.matrix(S_tg1[,1:d])
     X_tg2 = as.matrix(S_tg2[,1:d])
     Kmat_tg1 = Kxx(X_tg1)

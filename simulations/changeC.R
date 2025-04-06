@@ -38,7 +38,7 @@ header = c("B", "R", "c", "method", "risk")
 results_df = data.frame(matrix(ncol = length(header), nrow = 0))
 colnames(results_df) = header
 
-for (c in c(0.5,1,1.5,2,2.5)) { # vary c
+for (c in c(0,0.25,0.5,0.75,1,1.25)) { # vary c
   nt = round((70*B^0.5 + 12*R + 5) * 5) # number of samples in source data T
   ns = nt*4 # number of samples in target data S
   

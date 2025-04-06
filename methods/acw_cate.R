@@ -4,23 +4,21 @@ acw_cate = function(S, T, X_new) {
   ns = nrow(S) # number of samples in S
   lambdas = 2^(0:ceiling(log2(10*(ns/2))))/10/(ns/2) # candidate lambda values
   
-  # Split S into 3 parts for the cross-fitting methods
+  # Split S into 2 parts for the cross-fitting methods
   indices = sample(1:ns)
-  n1 = ceiling(ns / 3)
+  n1 = ceiling(ns / 2)
   D1 = S[indices[1:n1], ]
-  D2 = S[indices[(n1 + 1):(2 * n1)], ]
-  D3 = S[indices[(2 * n1 + 1):ns], ]
-  S_split = list(D1, D2, D3)
+  D2 = S[indices[(n1 + 1):ns], ]
+  S_split = list(D1, D2)
   
-  # define the three cyclic permutations
-  perms = list(c(1, 2, 3), c(3, 1, 2), c(2, 3, 1))
+  # define the cyclic permutations
+  perms = list(c(1, 2), c(2, 1))
   est_list = list()
   XT = as.matrix(T)
   nt = nrow(T)
   
   for (i in seq_along(perms)) {
     perm = perms[[i]]
-    S_nc = S_split[[perm[1]]]
     
     # nuisance parameter estimation
     S_nc = S_split[[perm[1]]]
@@ -75,9 +73,7 @@ acw_cate = function(S, T, X_new) {
     formula = as.formula(paste("k ~", variables))
     model_dens = glm(formula, data = all, family = binomial)
     
-    n2 = nrow(S_split[[perm[2]]])
-    n3 = nrow(S_split[[perm[3]]])
-    S_tg = rbind(S_split[[perm[2]]], S_split[[perm[3]]])
+    S_tg = S_split[[perm[2]]]
     weight = predict(model_dens, newdata = S_tg, type = "response") /
       (1 - predict(model_dens, newdata = S_tg, type = "response"))*ns/nt
     weight = weight * nrow(S_tg)/sum(weight)
@@ -93,8 +89,9 @@ acw_cate = function(S, T, X_new) {
     S_tg = S_tg %>% 
       mutate(phihat = what * (nrow(S_tg) + nt) / nrow(S_tg) * (a * (y - mu1hat) / pihat - (1 - a) * (y - mu0hat) / (1 - pihat))) %>% 
       select(-a, -y, -what, -pihat, -mu0hat, -mu1hat)
-    S_tg1 = S_tg[1:n2,]
-    S_tg2 = S_tg[(n2 + 1):(n2 + n3),]
+    partS_tg = sample(1:nrow(S_tg), ceiling(nrow(S_tg)/2))
+    S_tg1 = S_tg[partS_tg,]
+    S_tg2 = S_tg[-partS_tg,]
     
     T_hat = T
     T_hat$mu0hat = (S_nc$y[S_nc$a == 0] %*% solve(Kmat_ncor0 + nrow(X_ncor0) * bestlambda_mu0 * diag(nrow(X_ncor0))) %*% Kxy(X_ncor0, XT))[,]
